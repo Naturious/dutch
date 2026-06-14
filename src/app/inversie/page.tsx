@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { inversionExercises } from '@/data/inversion';
 import FeedbackMessage from '@/components/FeedbackMessage';
 import ScoreTracker from '@/components/ScoreTracker';
@@ -23,21 +23,44 @@ export default function Inversie() {
   const [answered, setAnswered] = useState(0);
 
   const current = exercises[currentIndex % exercises.length];
-  const options = current.options ? shuffleArray(current.options) : [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const options = useMemo(() => current.options ? shuffleArray(current.options) : [], [currentIndex]);
 
-  const checkAnswer = (option: string) => {
+  const checkAnswer = useCallback((option: string) => {
     setSelectedOption(option);
     const correct = option === current.correctSentence;
     setIsCorrect(correct);
     setAnswered((a) => a + 1);
     if (correct) setScore((s) => s + 1);
-  };
+  }, [current.correctSentence]);
 
-  const nextExercise = () => {
+  const nextExercise = useCallback(() => {
     setCurrentIndex((i) => i + 1);
     setSelectedOption(null);
     setIsCorrect(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+
+      if (selectedOption === null) {
+        const num = parseInt(e.key, 10);
+        if (num >= 1 && num <= options.length) {
+          e.preventDefault();
+          checkAnswer(options[num - 1]);
+        }
+      } else {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          nextExercise();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedOption, options, checkAnswer, nextExercise]);
 
   return (
     <div>
@@ -82,7 +105,12 @@ export default function Inversie() {
                 disabled={selectedOption !== null}
                 className={buttonClass}
               >
-                <span className="text-slate-800">{option}</span>
+                <span className="inline-flex items-center gap-3">
+                  <span className="inline-block w-6 h-6 rounded bg-slate-100 border border-slate-300 text-xs font-mono text-slate-500 leading-6 text-center flex-shrink-0">
+                    {i + 1}
+                  </span>
+                  <span className="text-slate-800">{option}</span>
+                </span>
               </button>
             );
           })}

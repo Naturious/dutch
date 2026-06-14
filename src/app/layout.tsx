@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import GlobalShortcuts from "@/components/GlobalShortcuts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,6 +32,7 @@ export default function RootLayout({
             </Link>
           </div>
         </nav>
+        <GlobalShortcuts />
         <main className="max-w-5xl mx-auto px-4 py-8">
           {children}
         </main>
