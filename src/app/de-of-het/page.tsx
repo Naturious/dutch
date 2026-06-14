@@ -149,7 +149,7 @@ export default function DeOfHet() {
     setTimeout(() => {
       setIsCorrect(null);
       setCurrentIndex((i) => i + 1);
-    }, 1500);
+    }, correct ? 400 : 1500);
   }, [currentWord, score, streak, highScore]);
 
   useEffect(() => {
