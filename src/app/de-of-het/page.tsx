@@ -63,6 +63,7 @@ export default function DeOfHet() {
   const [correctWords, setCorrectWords] = useState<Record<string, CorrectEntry>>({});
   const [showMistakes, setShowMistakes] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [ruleReminder, setRuleReminder] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProgress().then((data) => {
@@ -117,6 +118,11 @@ export default function DeOfHet() {
       });
     } else {
       setStreak(0);
+
+      if (currentWord.rule) {
+        setRuleReminder(currentWord.rule);
+        setTimeout(() => setRuleReminder(null), 6000);
+      }
 
       setMistakes((prev) => {
         const existing = prev[currentWord.word];
@@ -180,6 +186,13 @@ export default function DeOfHet() {
       </p>
 
       <ScoreTracker score={score} total={answered} highScore={highScore} streak={streak} />
+
+      {ruleReminder && (
+        <div className="mt-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2 animate-pulse">
+          <span className="text-amber-600 text-lg leading-none">💡</span>
+          <p className="text-sm text-amber-800 font-medium">{ruleReminder}</p>
+        </div>
+      )}
 
       <div className="mt-6 bg-white rounded-xl border border-slate-200 p-8 text-center">
         <p className="text-sm text-slate-500 mb-2">Welk lidwoord hoort bij:</p>
