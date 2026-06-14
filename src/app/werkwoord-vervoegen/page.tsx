@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { verbs, VerbConjugation } from '@/data/verbs';
 import FeedbackMessage from '@/components/FeedbackMessage';
 import ScoreTracker from '@/components/ScoreTracker';
@@ -31,6 +31,7 @@ export default function WerkwoordVervoegen() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const getCorrectAnswer = (verb: VerbConjugation, person: Person, tense: Tense): string => {
     return verb[tense][person];
@@ -49,6 +50,7 @@ export default function WerkwoordVervoegen() {
     setQuestion(generateQuestion());
     setUserInput('');
     setIsCorrect(null);
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   return (
@@ -84,16 +86,16 @@ export default function WerkwoordVervoegen() {
 
         <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
           <input
+            ref={inputRef}
             type="text"
             value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
+            onChange={(e) => { if (isCorrect === null) setUserInput(e.target.value); }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && isCorrect === null) checkAnswer();
+              if (e.key === 'Enter' && isCorrect === null && userInput.trim()) checkAnswer();
               if (e.key === 'Enter' && isCorrect !== null) nextQuestion();
             }}
             placeholder="Typ de vervoeging..."
             className="flex-1 border border-slate-300 rounded-lg px-4 py-2 text-slate-800 text-center focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-            disabled={isCorrect !== null}
           />
           {isCorrect === null ? (
             <button

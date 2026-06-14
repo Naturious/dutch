@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { separableVerbs } from '@/data/separable-verbs';
 import FeedbackMessage from '@/components/FeedbackMessage';
 import ScoreTracker from '@/components/ScoreTracker';
@@ -49,6 +49,7 @@ export default function ScheidbareWerkwoorden() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const current = exercises[currentIndex % exercises.length];
 
@@ -65,6 +66,7 @@ export default function ScheidbareWerkwoorden() {
     setCurrentIndex((i) => i + 1);
     setUserInput('');
     setIsCorrect(null);
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   return (
@@ -110,16 +112,16 @@ export default function ScheidbareWerkwoorden() {
 
         <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
           <input
+            ref={inputRef}
             type="text"
             value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
+            onChange={(e) => { if (isCorrect === null) setUserInput(e.target.value); }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && isCorrect === null) checkAnswer();
+              if (e.key === 'Enter' && isCorrect === null && userInput.trim()) checkAnswer();
               if (e.key === 'Enter' && isCorrect !== null) nextExercise();
             }}
             placeholder="Typ de volledige zin..."
             className="flex-1 border border-slate-300 rounded-lg px-4 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-            disabled={isCorrect !== null}
           />
           {isCorrect === null ? (
             <button
